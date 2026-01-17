@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+
+	<fields name="filter">
+
+		<field
+			name="search"
+			type="text"
+			label="COM_BATIRPERMI_CATEGORIES_FILTER_SEARCH_LABEL"
+			description="COM_BATIRPERMI_CATEGORIES_FILTER_SEARCH_DESC"
+			hint="JSEARCH_FILTER"
+		/>
+
+		<field
+			name="published"
+			type="status"
+			label="JOPTION_SELECT_PUBLISHED"
+			onchange="this.form.submit();"
+			>
+			<option value="">JOPTION_SELECT_PUBLISHED</option>
+		</field>
+		<field name="type" type="list" default="" onchange="this.form.submit();">
+		  <option value="">Type</option>
+		  <option value="0">appels d'offres / consultations </option>
+		  <option value="1">Batirpermis divers</option>
+		</field>
+
+	</fields>
+
+	<fields name="list">
+
+		<field
+			name="fullordering"
+			type="list"
+			label="JGLOBAL_SORT_BY"
+			default="a.title ASC"
+			onchange="this.form.submit();"
+			>
+			<option value="">JGLOBAL_SORT_BY</option>
+			<option value="a.title ASC">COM_BATIRPERMI_CATEGORIES_CATEGORIE_TITLE_ASC</option>
+			<option value="a.title DESC">COM_BATIRPERMI_CATEGORIES_CATEGORIE_TITLE_DESC</option>
+			<option value="a.datcommenc ASC">datcommenc_ASC</option>
+			<option value="a.datcommenc DESC">datcommenc_DESC</option>
+			<option value="a.id ASC">JGRID_HEADING_ID_ASC</option>
+			<option value="a.id DESC">JGRID_HEADING_ID_DESC</option>
+		</field>
+
+		<field
+			name="limit"
+			type="limitbox"
+			label="JGLOBAL_LIST_LIMIT"
+			default="25"
+			onchange="this.form.submit();"
+		/>
+	</fields>
+</form>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config>
+	<fieldset name="articles" label="Paramètres" >
+		<field name="stylebatirpermi" type="list" default="0" label="Nature" useglobal="true" >
+			  <option value="0">standard</option>
+			  <option value="1">Appels d'offres</option>
+
+			</field>
+		<field name="titrestyle" type="list" default="h1" label="Style de titre" useglobal="true" >
+		  <option value="h1">h1</option>
+		  <option value="h2">h2</option>
+		  <option value="h3">h3</option>
+		  <option value="h4">h4</option>
+		  <option value="h5">h5</option>
+		  <option value="h6">h6</option>
+		</field>
+		<field name="letitrecolor" type="color" useglobal="true" default="#333" format="hex"	label="Couleur Titre" />
+		<field name="haut_ligne" type="number" default="30" label="Hauteur de ligne de recherche" description="" min="10" max="60" step="1" />
+		<field name="backgroundcolor" type="color" default="#eee" format="hex"
+	label="Couleur entête"
+	description="Couleur entête" />
+		<field name="hits" type="number"  default="0" label="Hits" description=""  />
+        <field name="tablestyle" type="list" default="Tableau" label="Style de Tableau" >
+		  <option value="table">BS Basic Table</option>
+		  <option value="table-striped">BS Striped Rows</option>
+		  <option value="table-bordered">BS Bordered Table</option>
+		  <option value="table-hover">BS Hover Rows</option>
+		  <option value="table-condensed">BS Condensed Table</option>
+		  <option value="Tableau">Tableau</option>
+		</field>
+        <field name="lestylecss" type="textarea" default="" label="style css" description="" rows="10" cols="5" />
+		<field name="showlangues" type="radio" default="1" label="Afficher Langues" description="" class="btn-group btn-group-yesno">		
+			  <option value="1">JYES</option>
+			  <option value="0">JNO</option>
+			</field>
+	</fieldset>
+	<fieldset name="offres" label="Appel d'offres" 	>	
+				
+			<field
+				name="support"
+				type="subform"
+				label="supports des publications"
+				multiple="true"
+				default=' {"support0":{"lesupport":"Tuneps"},"support1":{"lesupport":"site des marchés public"}} '
+				layout="joomla.form.field.subform.repeatable-table"
+				min="1"
+				max="10"
+				>
+				<form>
+					<field name="lesupport" type="text" 	/>
+					
+				</form>
+			</field>
+			
+			<field name="aoletitre" type="text"  label="Titre"   />
+			
+			<field name="aoshowlangues" type="radio" default="1" label="Afficher Langues" description="" class="btn-group btn-group-yesno">		
+			  <option value="1">JYES</option>
+			  <option value="0">JNO</option>
+			</field>
+
+		</fieldset>
+	<fieldset
+		name="permissions"
+		label="JCONFIG_PERMISSIONS_LABEL"
+		description="JCONFIG_PERMISSIONS_DESC"
+		>
+
+		<field
+			name="rules"
+			type="rules"
+			label="JCONFIG_PERMISSIONS_LABEL"
+			filter="rules"
+			validate="rules"
+			component="com_batirpermi"
+			section="component"
+		 />
+	</fieldset>
+</config>

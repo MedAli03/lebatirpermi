@@ -1,0 +1,25 @@
+{
+  "$schema": "https://developer.joomla.org/schemas/json-schema/web_assets.json",
+  "name": "com_batirpermi",
+  "version": "4.0.0",
+  "description": "Joomla CMS",
+  "license": "GPL-2.0-or-later",
+  "assets": [
+    {
+      "name": "com_batirpermi.batirpermi",
+      "type": "script",
+      "uri": "com_batirpermi/batirpermi.js",
+      "dependencies": [
+        "core"
+      ],
+      "attributes": {
+        "defer": true
+      }
+    },
+    {
+      "name": "com_batirpermi.batirpermi",
+      "type": "style",
+      "uri": "com_batirpermi/batirpermi.css"
+    }
+  ]
+}

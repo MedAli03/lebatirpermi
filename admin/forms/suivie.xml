@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form>
+
+		<field
+			name="title"
+			type="text"
+			label="COM_BATIRPERMI_SUIVIE_TITLE"
+			required="true"
+			maxlength="128"
+		/>
+		<field
+			name="id"
+			type="text"
+			label="JGLOBAL_FIELD_ID_LABEL"
+			class="readonly"
+			default="0"
+			readonly="true"
+		/>
+		<field
+			name="language"
+			type="contentlanguage"
+			label="JFIELD_LANGUAGE_LABEL"
+			>
+			<option value="*">JALL</option>
+		</field>
+		<field
+			name="lacated"
+			type="sql"
+			label="catégorie"
+			class="form-select"
+			sql_select="id, title"
+			sql_from="#__batirpermi_categories"
+			sql_where="type = 0"
+			key_field="id"
+			value_field="title"
+			translate="true"
+			header=" - Select categorie - "
+			/>
+			
+		<field
+			name="downloaded"
+			type="text"
+			label="hits"
+			default="0"
+		/>
+		<field
+			name="state"
+			type="list"
+			label="JSTATUS"
+			class="form-select-color-state"
+			default="1"
+			validate="options"
+			>
+			<option value="1">JPUBLISHED</option>
+			<option value="0">JUNPUBLISHED</option>
+			<option value="2">JARCHIVED</option>
+			<option value="-2">JTRASHED</option>
+		</field>
+		<fieldset
+				name="details"
+				label="COM_batirpermi_batirpermi_DETAILS"
+	>
+		<field
+			name="reference"
+			type="text"
+			label="référence"
+			required="true"
+			maxlength="128"
+		/>
+		
+		<field name="type" type="radio" default="c" label="type" description="" class="btn-group">
+		  <option value="c">Consultation</option>
+		  <option value="a">Appel d'offres</option>
+		</field>
+		<field
+			name="caution"
+			type="text"
+			label="caution provisoire (dt)"
+			maxlength="5"
+		/>
+		<field
+				name="support"
+				type="subform"
+				label="supports des publications"
+				multiple="true"
+				layout="joomla.form.field.subform.repeatable-table"
+				default=' {"support0":{"lesupport":"Tuneps"},"support1":{"lesupport":"site des marchés public"}} '
+				>
+				<form>
+					<field name="lesupport" type="text" label="Titre" 	/>			
+					<field name="lereference" type="text" label="référence" filter="raw" />					
+				</form>
+		</field>
+		
+		<field
+				name="lesbatirpermis"
+				type="subform"
+				label="supports des publications"
+				multiple="true"
+				layout="joomla.form.field.subform.repeatable-table"
+				>
+				<form>
+					<field name="letitre" type="text" label="Titre" 	/>			
+					<field name="ledoc" label="Batirpermi" type="media"  />					
+				</form>
+		</field>
+		
+		
+		<field name="created" type="calendar" default="NOW" label="date création" 
+	class="input-small"  filter="user_utc"
+	showtime="true" todaybutton="false" filltable="false" translateformat="true" format="%Y-%m-%d %H:%M" />
+		
+		<field name="datcommenc" type="calendar" default="now"  label="Date et heure du commencement d'envoi des offres" 
+	class="input-small"  filter="user_utc"
+	showtime="true" todaybutton="false" filltable="false" translateformat="true" format="%Y-%m-%d %H:%M" />
+	
+		
+		<field name="echeance" type="calendar" default="NOW" label="Dernier délai de réception des offres" 
+	class="input-small"  filter="user_utc"
+	showtime="true" todaybutton="false" filltable="false" translateformat="true" format="%Y-%m-%d %H:%M" />
+		
+
+		
+		<field name="datouvoffre" type="calendar" default="now"  label="Date et heure d'ouverture des offres" 
+	class="input-small"  filter="user_utc"
+	showtime="true" todaybutton="false" filltable="false" translateformat="true" format="%Y-%m-%d %H:%M" />
+		
+
+	<field name="image" label="Batirpermi" type="media"  />
+
+		
+		</fieldset>
+</form>

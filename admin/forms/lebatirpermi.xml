@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form>
+
+		<field
+			name="title"
+			type="text"
+			label="COM_BATIRPERMI_LEBATIRPERMI_TITLE"
+			required="true"			
+		/>
+
+	<fieldset	name="details"	label="COM_batirpermi_batirpermi_DETAILS" >	
+	
+	<field	name="nom"	type="text"	label="Nom"	/>
+	<field	name="adresse"	type="text"	label="Adresse"	/>
+	<field	name="cin"	type="text"	label="CIN"	/>
+	<field	name="typebatiment"	type="text"	label="type de Construction"	/>
+	
+	<field name="aviscomission" type="list" default="" label="رأي اللجنة" >
+	  <option value="0">قرار بالموافقة </option>
+	  <option value="1">قرار بالرفض</option>
+	</field>
+	<field	name="superficie"	type="number"	label="Superficie (m²)"	/>	
+	
+	<field	name="prix"	type="number"	label="معلوم الرخصة"	step="0.001" />	
+	
+	<field name="datepermi" type="calendar"  label="تاريخ الرخصة" 
+	class="input-small"  filter="user_utc" todaybutton="false" filltable="false" translateformat="true" />
+	
+	<field	name="numpermi"	type="text"	label="عدد الرخصة"	/>
+
+		<field name="created" type="calendar" default="NOW" label="date création" 
+	class="input-small"  filter="user_utc"
+	showtime="true" todaybutton="false" filltable="false" translateformat="true" format="%Y-%m-%d %H:%M" />
+		
+
+		
+
+		<field
+			name="id"
+			type="text"
+			label="JGLOBAL_FIELD_ID_LABEL"
+			class="readonly"
+			default="0"
+			readonly="true"
+		/>
+
+		<field
+			name="state"
+			type="list"
+			label="JSTATUS"
+			class="form-select-color-state"
+			default="1"
+			validate="options"
+			>
+			<option value="1">JPUBLISHED</option>
+			<option value="0">JUNPUBLISHED</option>
+			<option value="2">JARCHIVED</option>
+			<option value="-2">JTRASHED</option>
+		</field>
+		
+		
+	</fieldset>
+
+</form>

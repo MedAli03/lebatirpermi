@@ -1,0 +1,152 @@
+<?php
+/**
+ * @package     Batirpermi.Administrator
+ * @subpackage  com_batirpermi
+ *
+ * @copyright   (C) 2022 Clifford E Ford
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
+ */
+
+namespace J4xdemos\Component\Batirpermi\Administrator\Model;
+
+defined('_JEXEC') or die;
+
+use Joomla\CMS\Component\ComponentHelper;
+use Joomla\CMS\Factory;
+use Joomla\CMS\MVC\Model\ListModel;
+use Joomla\Database\ParameterType;
+
+/**
+ * Methods to handle a list of records.
+ *
+ * @since  1.6
+ */
+class SuiviesModel extends ListModel
+{
+	/**
+	 * Constructor.
+	 *
+	 * @param   array  $config  An optional associative array of configuration settings.
+	 *
+	 * @see     \JController
+	 * @since   1.6
+	 */
+	public function __construct($config = array())
+	{
+		if (empty($config['filter_fields']))
+		{
+			$config['filter_fields'] = array(
+					'id', 'a.id',
+					'title', 'a.title',
+					'created', 'a.created',
+					'echeance', 'a.echeance',
+					'params', 'a.params',
+					'downloaded', 'a.downloaded',
+					'state', 'a.state',
+					'lacated', 'a.lacated',
+					'image', 'a.image',
+					'language', 'a.language',
+					'datcommenc', 'a.datcommenc',
+			);
+		}
+
+		parent::__construct($config);
+	}
+
+	protected function populateState($ordering = 'title', $direction = 'ASC')
+	{
+		$app = Factory::getApplication();
+
+		// List state information
+		$value = $app->input->get('limit', $app->get('list_limit', 0), 'uint');
+		$this->setState('list.limit', $value);
+
+		$value = $app->input->get('limitstart', 0, 'uint');
+		$this->setState('list.start', $value);
+
+		$search = $this->getUserStateFromRequest($this->context . '.filter.search', 'filter_search');
+		$this->setState('filter.search', $search);
+
+		// List state information.
+		parent::populateState($ordering, $direction);
+	}
+
+	
+	protected function getStoreId($id = '')
+	{
+		// Compile the store id.
+		$id .= ':' . serialize($this->getState('filter.title'));
+		$id .= ':' . $this->getState('filter.search');
+		$id .= ':' . $this->getState('filter.state');
+		//$id .= ':' . serialize($this->getState('filter.tag'));
+
+		return parent::getStoreId($id);
+	}
+
+	/**
+	 * Get the master query for retrieving a list of Suivies subject to the model state.
+	 *
+	 * @return  \Joomla\Database\DatabaseQuery
+	 *
+	 * @since   1.6
+	 */
+	protected function getListQuery()
+	{
+		// Create a new query object.
+		$db    = $this->getDbo();
+		$query = $db->getQuery(true);
+
+		// Select the required fields from the table.
+		$query->select(
+				$this->getState(
+						'list.select',
+						[
+								$db->quoteName('a.id'),
+								$db->quoteName('a.title'),
+								$db->quoteName('a.created'),
+								$db->quoteName('a.echeance'),
+								$db->quoteName('a.params'),
+								$db->quoteName('a.downloaded'),
+								$db->quoteName('a.lacated'),
+								$db->quoteName('a.image'),
+								$db->quoteName('a.datcommenc'),
+								$db->quoteName('a.state'),
+								$db->quoteName('a.language'),
+								$db->quoteName('b.title') . ' AS categorie_title',
+								
+						]
+						)
+				)
+				->from($db->quoteName('#__batirpermi_suivies', 'a'))
+				->leftjoin($db->quoteName('#__batirpermi_categories', 'b') . 'ON a.lacated = b.id');
+
+		// Filter by search in title.
+		$search = $this->getState('filter.search');
+
+		if (!empty($search))
+		{
+			$search = $db->quote('%' . str_replace(' ', '%', $db->escape(trim($search), true) . '%'));
+			$query->where('(a.title LIKE ' . $search . ')');
+		}
+
+		// Filter by published state
+		$published = (string) $this->getState('filter.published');
+
+		if ($published !== '*')
+		{
+			if (is_numeric($published))
+			{
+				$state = (int) $published;
+				$query->where($db->quoteName('a.state') . ' = :state')
+				->bind(':state', $state, ParameterType::INTEGER);
+			}
+		}
+
+		// Add the list ordering clause.
+		$orderCol  = $this->state->get('list.ordering', 'a.title');
+		$orderDirn = $this->state->get('list.direction', 'ASC');
+
+		$query->order($db->escape($orderCol) . ' ' . $db->escape($orderDirn));
+		return $query;
+	}
+}

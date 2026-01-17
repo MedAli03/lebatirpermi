@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+	<layout title="Suivie de Permi de batir" 
+		option="Suivie de Permi de batir">
+		
+		<message>
+			<![CDATA[Suivie de Permi de batir]]>
+		</message>
+	</layout>
+	
+
+	<!-- Add fields to the parameters object for the layout. -->
+	<fields name="params">		
+
+		<!-- Articles options. -->
+		<fieldset name="articles" label="Paramètres" >	
+				
+			<field name="letitre" type="text"  label="Titre"   />
+			
+			
+
+		</fieldset>
+		
+		<fieldset name="Styles" label="Styles" >	
+				
+			<field name="lestylecss" type="textarea" default="" label="style css" description="" rows="10" cols="5" />
+			<field name="aoletitre" type="text"  label="Titre"   />
+			
+			<field name="alignhits" type="radio" default="1" label="Align Hits " class="btn-group">		
+			  <option value="1">Left</option>
+			  <option value="0">Right</option>
+			</field>
+
+		</fieldset>
+
+	</fields>
+</metadata>
