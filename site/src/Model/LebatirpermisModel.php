@@ -11,7 +11,6 @@ namespace J4xdemos\Component\Batirpermi\Site\Model;
 
 defined('_JEXEC') or die;
 
-use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Model\ListModel;
 use Joomla\Database\ParameterType;
@@ -157,6 +156,37 @@ class LebatirpermisModel extends ListModel
 		//$query->order('created DESC');
 		$query->order($db->escape($orderCol) . ' ' . $db->escape($orderDirn));
 		return $query;
+	}
+
+	public function searchByCinAndDossier(string $cin, string $numdossier): ?array
+	{
+		if ($cin === '' || $numdossier === '') {
+			return null;
+		}
+
+		$db = $this->getDatabase();
+		$query = $db->getQuery(true)
+			->select([
+				$db->quoteName('p.id'),
+				$db->quoteName('p.title'),
+				$db->quoteName('p.nom'),
+				$db->quoteName('p.cin'),
+				$db->quoteName('p.resultat'),
+				$db->quoteName('p.typebatiment'),
+				$db->quoteName('p.ingenieur'),
+				$db->quoteName('c.title') . ' AS category_title',
+			])
+			->from($db->quoteName('#__batirpermi_lebatirpermis', 'p'))
+			->join('LEFT', $db->quoteName('#__batirpermi_categories', 'c') . ' ON c.id = p.lacated')
+			->where($db->quoteName('p.numdossier') . ' = :numdossier')
+			->where($db->quoteName('p.cin') . ' = :cin')
+			->bind(':numdossier', $numdossier, ParameterType::STRING)
+			->bind(':cin', $cin, ParameterType::STRING);
+
+		$db->setQuery($query);
+		$result = $db->loadAssoc();
+
+		return $result ?: null;
 	}
 
 }

@@ -1,12 +1,9 @@
 <?php
 \defined('_JEXEC') or die;
 
-use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
-use Joomla\CMS\Session\Session;
-use Joomla\Database\ParameterType;
 
 ?>
 
@@ -17,39 +14,26 @@ use Joomla\Database\ParameterType;
     </h3>
 
 <?php
-$app = Factory::getApplication();
-$input = $app->input;
-$cin = $input->post->getString('cin');
-$numdossier = $input->post->getString('numdossier');
+$cin = $this->cin ?? '';
+$numdossier = $this->numdossier ?? '';
+$result = $this->result ?? null;
 
-if ($input->post->get('submit')) {
-    if (!Session::checkToken()) {
-        echo '<div class="alert alert-danger text-center">' . Text::_('JINVALID_TOKEN') . '</div>';
-        echo '<div class="text-center my-3"><a class="btn btn-primary" href="services/permi-batir">' . Text::_('COM_PERMIBATIR_PERMIBATIRS_SEARCHAGAIN') . '</a></div>';
-    } elseif (!empty($cin) && !empty($numdossier)) {
-        $db = Factory::getDbo();
-        $query = $db->getQuery(true)
-            ->select([
-                'p.id',
-                'p.title',
-                'p.nom',
-                'p.cin',
-                'p.resultat',
-                'p.typebatiment',
-                'p.ingenieur',
-                'c.title AS category_title'
-            ])
-            ->from($db->quoteName('#__batirpermi_lebatirpermis', 'p'))
-            ->join('LEFT', $db->quoteName('#__batirpermi_categories', 'c') . ' ON c.id = p.lacated')
-            ->where($db->quoteName('p.numdossier') . ' = :numdossier')
-            ->where($db->quoteName('p.cin') . ' = :cin')
-            ->bind(':numdossier', $numdossier, ParameterType::STRING)
-            ->bind(':cin', $cin, ParameterType::STRING);
+$searchAgainUrl = Route::_('index.php?option=com_batirpermi&view=lebatirpermis');
+?>
 
-        $db->setQuery($query);
-        $result = $db->loadAssoc();
-
-        if (!empty($result)) {
+<?php if ($this->isSubmitted) : ?>
+    <?php if (!$this->tokenValid) : ?>
+        <div class="alert alert-danger text-center" role="alert">
+            <?php echo Text::_('JINVALID_TOKEN'); ?>
+        </div>
+        <div class="text-center my-3">
+            <a class="btn btn-primary" href="<?php echo $searchAgainUrl; ?>">
+                <?php echo Text::_('COM_PERMIBATIR_PERMIBATIRS_SEARCHAGAIN'); ?>
+            </a>
+        </div>
+    <?php elseif ($cin !== '' && $numdossier !== '') : ?>
+        <?php if (!empty($result)) : ?>
+            <?php
             $safeId = htmlspecialchars((string) ($result['id'] ?? ''), ENT_QUOTES, 'UTF-8');
             $safeTitle = htmlspecialchars((string) ($result['title'] ?? ''), ENT_QUOTES, 'UTF-8');
             $safeName = htmlspecialchars((string) ($result['name'] ?? $result['nom'] ?? ''), ENT_QUOTES, 'UTF-8');
@@ -57,34 +41,72 @@ if ($input->post->get('submit')) {
             $safeType = htmlspecialchars((string) ($result['typebatiment'] ?? ''), ENT_QUOTES, 'UTF-8');
             $safeIngenieur = htmlspecialchars((string) ($result['ingenieur'] ?? ''), ENT_QUOTES, 'UTF-8');
             $safeResultat = htmlspecialchars((string) ($result['resultat'] ?? ''), ENT_QUOTES, 'UTF-8');
-            echo '<table class="table table-bordered table-striped w-75 mx-auto">';
-            echo '<tr><th>' . Text::_('COM_PERMIBATIR_PERMIBATIRS_NUMUNIQUE') . '</th><td>' . $safeId . '</td></tr>';
-            echo '<tr><th>' . Text::_('COM_PERMIBATIR_PERMIBATIRS_NUMDOSSIER') . '</th><td>' . $safeTitle . '</td></tr>';
-            echo '<tr><th>' . Text::_('COM_PERMIBATIR_PERMIBATIRS_NAME') . '</th><td>' . $safeName . '</td></tr>';
-            echo '<tr><th>' . Text::_('COM_PERMIBATIR_PERMIBATIRS_CIN') . '</th><td>' . $safeCin . '</td></tr>';
-            echo '<tr><th>' . Text::_('COM_PERMIBATIR_PERMIBATIRS_TYPE') . '</th><td>' . $safeType . '</td></tr>';
-            echo '<tr><th>' . Text::_('COM_PERMIBATIR_PERMIBATIRS_INGENIEUR') . '</th><td>' . $safeIngenieur . '</td></tr>';
-            echo '<tr><th>' . Text::_('COM_PERMIBATIR_PERMIBATIRS_RESULT') . '</th><td class="text-danger fw-bold">' . $safeResultat . '</td></tr>';
-            echo '</table>';
+            $printUrl = Route::_('index.php?option=com_batirpermi&view=lebatirpermis&layout=print&' . http_build_query(['numdossier' => $numdossier, 'cin' => $cin]));
+            ?>
+            <table class="table table-bordered table-striped w-75 mx-auto">
+                <tr>
+                    <th><?php echo Text::_('COM_PERMIBATIR_PERMIBATIRS_NUMUNIQUE'); ?></th>
+                    <td><?php echo $safeId; ?></td>
+                </tr>
+                <tr>
+                    <th><?php echo Text::_('COM_PERMIBATIR_PERMIBATIRS_NUMDOSSIER'); ?></th>
+                    <td><?php echo $safeTitle; ?></td>
+                </tr>
+                <tr>
+                    <th><?php echo Text::_('COM_PERMIBATIR_PERMIBATIRS_NAME'); ?></th>
+                    <td><?php echo $safeName; ?></td>
+                </tr>
+                <tr>
+                    <th><?php echo Text::_('COM_PERMIBATIR_PERMIBATIRS_CIN'); ?></th>
+                    <td><?php echo $safeCin; ?></td>
+                </tr>
+                <tr>
+                    <th><?php echo Text::_('COM_PERMIBATIR_PERMIBATIRS_TYPE'); ?></th>
+                    <td><?php echo $safeType; ?></td>
+                </tr>
+                <tr>
+                    <th><?php echo Text::_('COM_PERMIBATIR_PERMIBATIRS_INGENIEUR'); ?></th>
+                    <td><?php echo $safeIngenieur; ?></td>
+                </tr>
+                <tr>
+                    <th><?php echo Text::_('COM_PERMIBATIR_PERMIBATIRS_RESULT'); ?></th>
+                    <td class="text-danger fw-bold"><?php echo $safeResultat; ?></td>
+                </tr>
+            </table>
 
-            echo '<div class="text-center my-4">';
-            echo '<a class="btn btn-primary me-2" href="services/permi-batir">' . Text::_('COM_PERMIBATIR_PERMIBATIRS_SEARCHAGAIN') . '</a>';
-            echo '<a class="btn btn-secondary" href="' . Route::_('index.php?option=com_batirpermi&view=lebatirpermis&layout=print&' . http_build_query(['numdossier' => $numdossier, 'cin' => $cin])) . '" target="_blank">Imprimer</a>';
-            echo '</div>';
-        } else {
-            echo '<div class="alert alert-danger text-center">' . Text::_('COM_PERMIBATIR_PERMIBATIRS_INCORRECT') . '</div>';
-            echo '<div class="text-center my-3"><a class="btn btn-primary" href="services/permi-batir">' . Text::_('COM_PERMIBATIR_PERMIBATIRS_SEARCHAGAIN') . '</a></div>';
-        }
-    } else {
-        echo '<div class="alert alert-warning text-center">' . Text::_('COM_PERMIBATIR_PERMIBATIRS_INCORRECT') . '</div>';
-        echo '<div class="text-center my-3"><a class="btn btn-primary" href="services/permi-batir">' . Text::_('COM_PERMIBATIR_PERMIBATIRS_SEARCHAGAIN') . '</a></div>';
-    }
-} else {
-?>
+            <div class="text-center my-4">
+                <a class="btn btn-primary me-2" href="<?php echo $searchAgainUrl; ?>">
+                    <?php echo Text::_('COM_PERMIBATIR_PERMIBATIRS_SEARCHAGAIN'); ?>
+                </a>
+                <a class="btn btn-secondary" href="<?php echo $printUrl; ?>" target="_blank" rel="noopener">
+                    <?php echo Text::_('COM_BATIRPERMI_PRINT_BUTTON'); ?>
+                </a>
+            </div>
+        <?php else : ?>
+            <div class="alert alert-danger text-center" role="alert">
+                <?php echo Text::_('COM_PERMIBATIR_PERMIBATIRS_INCORRECT'); ?>
+            </div>
+            <div class="text-center my-3">
+                <a class="btn btn-primary" href="<?php echo $searchAgainUrl; ?>">
+                    <?php echo Text::_('COM_PERMIBATIR_PERMIBATIRS_SEARCHAGAIN'); ?>
+                </a>
+            </div>
+        <?php endif; ?>
+    <?php else : ?>
+        <div class="alert alert-warning text-center" role="alert">
+            <?php echo Text::_('COM_PERMIBATIR_PERMIBATIRS_INCORRECT'); ?>
+        </div>
+        <div class="text-center my-3">
+            <a class="btn btn-primary" href="<?php echo $searchAgainUrl; ?>">
+                <?php echo Text::_('COM_PERMIBATIR_PERMIBATIRS_SEARCHAGAIN'); ?>
+            </a>
+        </div>
+    <?php endif; ?>
+<?php else : ?>
 
     <div class="card w-75 mx-auto">
         <div class="card-body">
-            <form action="https://www.msaken.site/espaces/fda-almwatn/mtabt-rkhs-albna?view=lebatirpermis" method="post" class="row g-3">
+            <form action="<?php echo $searchAgainUrl; ?>" method="post" class="row g-3">
                 <div class="col-md-6">
                     <label for="cin" class="form-label"><?php echo Text::_('COM_PERMIBATIR_PERMIBATIRS_CIN'); ?></label>
                     <input type="text" name="cin" id="cin" class="form-control" required>
@@ -101,6 +123,6 @@ if ($input->post->get('submit')) {
         </div>
     </div>
 
-<?php } ?>
+<?php endif; ?>
 
 </div>

@@ -1,27 +1,21 @@
 <?php
 
-
 namespace J4xdemos\Component\Batirpermi\Site\Controller;
 
 defined('_JEXEC') or die;
 
-use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Factory;
-use Joomla\CMS\Uri\Uri;
-use Joomla\CMS\Router\Route;
 use Joomla\CMS\Filesystem\File;
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\MVC\Controller\BaseController;
+use Joomla\CMS\Router\Route;
 use Joomla\CMS\Session\Session;
-use \stdClass;
-use Joomla\CMS\Table\Table;
-
+use RuntimeException;
 
 class ApofadminController extends BaseController
 {
-	
-	
-	public function ajouter()
-	{		
+	public function ajouter(): void
+	{
 		$app = Factory::getApplication();
 		$input = $app->input;
 
@@ -31,173 +25,34 @@ class ApofadminController extends BaseController
 			return;
 		}
 
-		$Json_support = null;
-		$leTitres = $input->post->get('LeTitre', [], 'array');
-		$laRefs = $input->post->get('Laref', [], 'array');
-		if (!empty($leTitres)) {
-			$supportData = [];
-			foreach ($leTitres as $LeTitre_cle => $LeTitre_element) {
-				$supportData['support' . $LeTitre_cle] = [
-					'lesupport' => $this->test_input($LeTitre_element),
-					'lereference' => $this->test_input($laRefs[$LeTitre_cle] ?? ''),
-				];
-			}
-			$Json_support = json_encode($supportData, JSON_UNESCAPED_UNICODE);
+		if (!$this->authoriseAction('core.create', 'apofadmins')) {
+			return;
 		}
 
-		$Json_lesbatirpermis = null;
-		$titdocs = $input->post->get('titdoc', [], 'array');
-		if (!empty($titdocs)) {
-			$lesbatirpermisData = [];
-			$files = $input->files->get('leficher', [], 'array');
-			foreach ($titdocs as $titdoc_cle => $titdoc_element) {
-				$lenomdufichier = '';
-				$fileError = $files['error'][$titdoc_cle] ?? 4;
-				if ($fileError != 4) {
-					$fileName = $files['name'][$titdoc_cle] ?? '';
-					if (count(explode('.', $fileName)) < 2) {
-						throw new RuntimeException(Text::_('sans extension'));
-					}
-					$timestamp = time();
-					$safeName = str_replace(' ', '-', File::makeSafe($fileName));
-					$filename = JPATH_SITE . '/images/pdf/' . $timestamp . '-' . $safeName;
-					if (!File::upload($files['tmp_name'][$titdoc_cle] ?? '', $filename)) {
-						$app->enqueueMessage(Text::_('non uploadé'));
-						return false;
-					}
-					$lenomdufichier = 'images/pdf/' . $timestamp . '-' . $safeName;
-				}
-
-				$lesbatirpermisData['lesbatirpermis' . $titdoc_cle] = [
-					'letitre' => $this->test_input($titdoc_element),
-					'ledoc' => $lenomdufichier,
-				];
-			}
-			$Json_lesbatirpermis = json_encode($lesbatirpermisData, JSON_UNESCAPED_UNICODE);
+		try {
+			$data = $this->buildPayload($input);
+		} catch (RuntimeException $exception) {
+			$app->enqueueMessage($exception->getMessage(), 'error');
+			$app->redirect(Route::_('index.php?option=com_batirpermi&view=apofadmins'));
+			return;
 		}
-	/*	if ($_POST['titdoc']) {
-		$derniereCle = end($_POST['titdoc']);
-		$Json_lesbatirpermis = '{' ;
-			foreach($_POST['titdoc'] as  $titdoc_cle => $titdoc_element){
-				
-				 
-				/////////////////////////  debuté  file
-				
-				$file = $_FILES["leficher"];
-					if (isset($file) and $file['error'] != 4 ) // and $file['size'] < 204800
-						  {
-						  
-							  if (count(explode('.', $file['name'])) < 2)
-							  {
-							  throw new RuntimeException(Text::_('sans extension'));
-							  return false;
-							  }
-						  
-						  $filename = JPATH_SITE .'/images/pdf/' . time() .'-' . str_replace(' ', '-',File::makeSafe($file['name']));
-						  
-						  
-						  if (!File::upload($file['tmp_name'], $filename))
-						  {
-							  $app->enqueueMessage(Text::_('non uploadé'));
-							  return false;
-						  }
-						  
-						  $jsonname = new stdClass();
-						  $jsonname->name = $file['name'] ;
-						  $jsonname->type = $file['type'] ;
-						  $jsonname->size = $file['size'] ;
-						  $jsonname->fname = time() .'-' . str_replace(' ', '-', File::makeSafe($file['name'])) ;
-						  $object->lesbatirpermis= json_encode($jsonname) ;	  
-					}
-				
-				
-				//////////////////////////    fin file
-				
-				
-				
-				
-				
-				if($titdoc_element === $derniereCle) {$levirgule='';}else{$levirgule=',';}
-				$Json_lesbatirpermis .= '"lesbatirpermis'.$titdoc_cle.'":{"letitre":"'.$titdoc_element.'","ledoc":"'.$_POST['leficher'][$titdoc_cle].'"}'.$levirgule ;	
-			}
-				
-				
-				
-				
-					
-			}
-			$Json_lesbatirpermis .= '}' ;*/
-			
-		//	$Json_lesbatirpermis = 'qqqqqq';
 
-	//	echo $Json_support . '<br>' . $Json_lesbatirpermis ; exit;
+		$model = $this->getModel('Apofadmin');
+		if (!$model->create($data)) {
+			$app->enqueueMessage(Text::_('JERROR_AN_ERROR_HAS_OCCURRED'), 'error');
+			$app->redirect(Route::_('index.php?option=com_batirpermi&view=apofadmins'));
+			return;
+		}
 
-
-
-		$object = new stdClass();
-		$object->title  = $this->test_input($input->post->getString('title'));
-		$object->reference  = $this->test_input($input->post->getString('reference'));
-		$object->type= $this->test_input($input->post->getString('type'));
-		$object->lacated= $this->test_input($input->post->getString('lacated'));
-        $object->caution= $this->test_input($input->post->getString('caution'));
-		$object->created= $this->test_input($input->post->getString('created'));
-		$object->echeance= $this->test_input($input->post->getString('echeance'));
-		$object->datcommenc= $this->test_input($input->post->getString('datcommenc'));
-		$object->datouvoffre= $this->test_input($input->post->getString('datouvoffre'));
-		$object->params= $this->test_input($input->post->getString('params'));
-		$object->lesbatirpermis= $Json_lesbatirpermis;
-		$object->support= $Json_support ;
-		$object->image= $this->test_input($input->post->getString('image'));
-		$object->language= $this->test_input($input->post->getString('language'));
-		$object->state= $this->test_input($input->post->getString('state'));
-		
-		// Ajout file
-		$file = $input->files->get('image', null, 'array');
-		if (isset($file) and ($file['error'] ?? 4) != 4 ) // and $file['size'] < 204800
-			  {
-			  
-				  if (count(explode('.', $file['name'] ?? '')) < 2)
-				  {
-				  throw new RuntimeException(Text::_('sans extension'));
-				  return false;
-				  }
-			  
-			  $timestamp = time();
-			  $safeName = str_replace(' ', '-', File::makeSafe($file['name'] ?? ''));
-			  $filename = JPATH_SITE .'/images/pdf/' . $timestamp .'-' . $safeName;
-			  
-			  
-			  if (!File::upload($file['tmp_name'] ?? '', $filename))
-			  {
-				  $app->enqueueMessage(Text::_('non uploadé'));
-				  return false;
-			  }
-			  
-			  $jsonname = new stdClass();
-			  $jsonname->name = $file['name'] ?? '';
-			  $jsonname->type = $file['type'] ?? '';
-			  $jsonname->size = $file['size'] ?? 0; 
-			  $jsonname->fname = $timestamp .'-' . $safeName ;
-			  $object->image= json_encode($jsonname) ;	  
-	    }
-
-		// Fin Ajout File 
-
-
-
-
-		$stateValue = $input->post->get('state', '', 'string');
-		$object->state  = ($stateValue === 'on' || $stateValue === '1') ? 1 : 0 ;
-		$result = Factory::getDbo()->insertObject('#__batirpermi_suivies', $object);
-		$app->enqueueMessage('Analyse ajoutée');
+		$app->enqueueMessage(Text::_('COM_BATIRPERMI_APOFADMIN_CREATED'));
 		$app->redirect(Route::_('index.php?option=com_batirpermi&view=apofadmins'));
 	}
-	
-	public function edit()
-	{		
-		
+
+	public function edit(): void
+	{
 		$app = Factory::getApplication();
 		$input = $app->input;
+		$id = $input->getInt('id');
 
 		if (!Session::checkToken()) {
 			$app->enqueueMessage(Text::_('JINVALID_TOKEN'), 'error');
@@ -205,201 +60,265 @@ class ApofadminController extends BaseController
 			return;
 		}
 
-	    $Json_support = null;
-		$leTitres = $input->post->get('LeTitre', [], 'array');
-		$laRefs = $input->post->get('Laref', [], 'array');
-		if (!empty($leTitres)) {
-			$supportData = [];
-			foreach ($leTitres as $LeTitre_cle => $LeTitre_element) {
-				$supportData['support' . $LeTitre_cle] = [
-					'lesupport' => $this->test_input($LeTitre_element),
-					'lereference' => $this->test_input($laRefs[$LeTitre_cle] ?? ''),
-				];
-			}
-			$Json_support = json_encode($supportData, JSON_UNESCAPED_UNICODE);
+		if (!$this->authoriseAction('core.edit', 'apofadmins')) {
+			return;
 		}
 
-		$Json_lesbatirpermis = null;
-		$titdocs = $input->post->get('titdoc', [], 'array');
-		$leficherHidden = $input->post->get('leficherh', [], 'array');
-		if (!empty($titdocs)) {
-			$lesbatirpermisData = [];
-			$files = $input->files->get('leficher', [], 'array');
-			foreach ($titdocs as $titdoc_cle => $titdoc_element) {
-				$lenomdufichier = $leficherHidden[$titdoc_cle] ?? '';
-				$fileError = $files['error'][$titdoc_cle] ?? 4;
-				if ($fileError != 4) {
-					$fileName = $files['name'][$titdoc_cle] ?? '';
-					if (count(explode('.', $fileName)) < 2) {
-						throw new RuntimeException(Text::_('sans extension'));
-					}
-					$timestamp = time();
-					$safeName = str_replace(' ', '-', File::makeSafe($fileName));
-					$filename = JPATH_SITE . '/images/pdf/' . $timestamp . '-' . $safeName;
-					if (!File::upload($files['tmp_name'][$titdoc_cle] ?? '', $filename)) {
-						$app->enqueueMessage(Text::_('non uploadé'));
-						return false;
-					}
-					$lenomdufichier = 'images/pdf/' . $timestamp . '-' . $safeName;
-				}
-
-				$lesbatirpermisData['lesbatirpermis' . $titdoc_cle] = [
-					'letitre' => $this->test_input($titdoc_element),
-					'ledoc' => $lenomdufichier,
-				];
-			}
-			$Json_lesbatirpermis = json_encode($lesbatirpermisData, JSON_UNESCAPED_UNICODE);
+		try {
+			$data = $this->buildPayload($input);
+		} catch (RuntimeException $exception) {
+			$app->enqueueMessage($exception->getMessage(), 'error');
+			$app->redirect(Route::_('index.php?option=com_batirpermi&view=apofadmins'));
+			return;
 		}
-		
 
+		$model = $this->getModel('Apofadmin');
+		if (!$model->update($id, $data)) {
+			$app->enqueueMessage(Text::_('JERROR_AN_ERROR_HAS_OCCURRED'), 'error');
+			$app->redirect(Route::_('index.php?option=com_batirpermi&view=apofadmins'));
+			return;
+		}
 
+		$app->enqueueMessage(Text::_('COM_BATIRPERMI_APOFADMIN_UPDATED'));
 
-		$updateNulls = true;
-		$object = new \stdClass;		
-		$object->id = $input->getInt('id') ;
-		$object->title  = $this->test_input($input->post->getString('title'));
-		$object->reference  = $this->test_input($input->post->getString('reference'));
-		$object->type= $this->test_input($input->post->getString('type'));
-		$object->lacated= $this->test_input($input->post->getString('lacated'));
-        $object->caution= $this->test_input($input->post->getString('caution'));
-		$createdValue = $input->post->getString('created');
-		$echeanceValue = $input->post->getString('echeance');
-		$datcommencValue = $input->post->getString('datcommenc');
-		$datouvoffreValue = $input->post->getString('datouvoffre');
-		$object->created= ($createdValue === '') ? null : $createdValue;
-		$object->echeance= ($echeanceValue === '') ? null : $echeanceValue; 
-		$object->datcommenc= ($datcommencValue === '') ? null : $datcommencValue; 
-		$object->datouvoffre= ($datouvoffreValue === '') ? null : $datouvoffreValue; 
-		$object->params= $this->test_input($input->post->getString('params'));
-		$object->lesbatirpermis= $Json_lesbatirpermis ;
-		$object->support= $Json_support ;
-		$object->image= $this->test_input($input->post->getString('image'));
-		$object->language= $this->test_input($input->post->getString('language'));
-		$object->state= $this->test_input($input->post->getString('state'));
-
-
-
-		// Ajout file
-		$file = $input->files->get('image', null, 'array');
-		if (isset($file) and ($file['error'] ?? 4) != 4 ) // and $file['size'] < 204800
-			  {
-			  
-				  if (count(explode('.', $file['name'] ?? '')) < 2)
-				  {
-				  throw new RuntimeException(Text::_('sans extension'));
-				  return false;
-				  }
-			  
-			  $timestamp = time();
-			  $safeName = str_replace(' ', '-', File::makeSafe($file['name'] ?? ''));
-			  $filename = JPATH_SITE .'/images/pdf/' . $timestamp .'-' . $safeName;
-			  
-			  
-			  if (!File::upload($file['tmp_name'] ?? '', $filename))
-			  {
-				  $app->enqueueMessage(Text::_('non uploadé'));
-				  return false;
-			  }
-			  
-			  $jsonname = new stdClass();
-			  $jsonname->name = $file['name'] ?? '';
-			  $jsonname->type = $file['type'] ?? '';
-			  $jsonname->size = $file['size'] ?? 0;
-			  $jsonname->fname = $timestamp .'-' . $safeName ;
-			  $object->image= json_encode($jsonname) ;	  
-	    }
-
-		// Fin Ajout File 
-		
-		$stateValue = $input->post->get('state', '', 'string');
-		$object->state  = ($stateValue === 'on' || $stateValue === '1') ? 1 : 0 ;
-		$result = Factory::getDbo()->updateObject('#__batirpermi_suivies', $object, 'id', $updateNulls);		
-		$app->enqueueMessage('Modification effectuée ');
 		if ($input->post->getString('enregistrer') === 'Enregistrer') {
-			$uri = Uri::getInstance();
-			$url = $uri->toString();
-			$app->redirect(Route::_('index.php?option=com_batirpermi&view=apofadmin&id='.$app->input->getInt('id'),false));
-			//$app->redirect($url);
-			} else {$app->redirect(Route::_('index.php?option=com_batirpermi&view=apofadmins'));}
-		
-		
-	}
-	
-
-	public function publish()
-	{
-		$app = Factory::getApplication();
-		if (!Session::checkToken('get')) {
-			$app->enqueueMessage(Text::_('JINVALID_TOKEN'), 'error');
-			$app->redirect(Route::_('index.php?option=com_batirpermi&view=apofadmins'));
+			$app->redirect(Route::_('index.php?option=com_batirpermi&view=apofadmin&id=' . $id, false));
 			return;
 		}
-		$updateNulls = true;
-		$object = new \stdClass;
-		$object->id = $app->input->getInt('id') ;
-		$object->state = ($app->input->getInt('p') == 1 ) ? 0 : 1 ;
-		$result = Factory::getDbo()->updateObject('#__batirpermi_suivies', $object, 'id', $updateNulls);
+
 		$app->redirect(Route::_('index.php?option=com_batirpermi&view=apofadmins'));
 	}
-	
-	public function delete()
+
+	public function publish(): void
 	{
 		$app = Factory::getApplication();
+		$input = $app->input;
+
 		if (!Session::checkToken('get')) {
 			$app->enqueueMessage(Text::_('JINVALID_TOKEN'), 'error');
 			$app->redirect(Route::_('index.php?option=com_batirpermi&view=apofadmins'));
 			return;
 		}
-		$db = Factory::getDbo();
-		$query = $db->getQuery(true);
-		$query->delete($db->quoteName('#__batirpermi_suivies'));
-		$query->where($db->quoteName('id') . ' = ' . $app->input->getInt('id'));		
-		$db->setQuery($query);		
-		$result = $db->execute();
+
+		if (!$this->authoriseAction('core.edit.state', 'apofadmins')) {
+			return;
+		}
+
+		$id = $input->getInt('id');
+		$currentState = $input->getInt('p');
+		$newState = ($currentState === 1) ? 0 : 1;
+
+		$model = $this->getModel('Apofadmin');
+		if (!$model->setState($id, $newState)) {
+			$app->enqueueMessage(Text::_('JERROR_AN_ERROR_HAS_OCCURRED'), 'error');
+		}
+
 		$app->redirect(Route::_('index.php?option=com_batirpermi&view=apofadmins'));
 	}
-	
-	public function test_input($data)
+
+	public function delete(): void
 	{
-		$data = trim($data);
-		$data = stripslashes($data);
-		//$data = htmlspecialchars($data);
-		//$data = htmlentities($data);
-		return $data;
-	}
-	
-	public function deleteimg()
-	{		
 		$app = Factory::getApplication();
+		$input = $app->input;
+
 		if (!Session::checkToken('get')) {
 			$app->enqueueMessage(Text::_('JINVALID_TOKEN'), 'error');
 			$app->redirect(Route::_('index.php?option=com_batirpermi&view=apofadmins'));
 			return;
 		}
-		$db = Factory::getDbo();
-		$query = $db
-			->getQuery(true)
-			->select('image')
-			->from($db->quoteName('#__batirpermi_suivies'))
-			->where($db->quoteName('id') . " = " . (int) $app->input->get('id') );	
-		$db->setQuery($query);
-		$result = $db->loadResult();
-		$file = JPATH_SITE . '/images/pdf/' . json_decode($result)->fname ;
-		$app->enqueueMessage($file);
-		
-		File::delete($file);
-		
 
-			
-		$updateNulls = true;
-		$object = new \stdClass();
-		$object->id  =  $app->input->get('id') ;
-		$object->image = '' ;				
-		$result = Factory::getDbo()->updateObject('#__batirpermi_suivies', $object, 'id', $updateNulls);							
-		$app->redirect(Route::_('index.php?option=com_batirpermi&view=apofadmin&id='.$app->input->getInt('id'))) ;
-		
-		
+		if (!$this->authoriseAction('core.delete', 'apofadmins')) {
+			return;
+		}
 
+		$model = $this->getModel('Apofadmin');
+		if (!$model->deleteById($input->getInt('id'))) {
+			$app->enqueueMessage(Text::_('JERROR_AN_ERROR_HAS_OCCURRED'), 'error');
+		}
+
+		$app->redirect(Route::_('index.php?option=com_batirpermi&view=apofadmins'));
 	}
 
+	public function deleteimg(): void
+	{
+		$app = Factory::getApplication();
+		$input = $app->input;
+		$id = $input->getInt('id');
+
+		if (!Session::checkToken('get')) {
+			$app->enqueueMessage(Text::_('JINVALID_TOKEN'), 'error');
+			$app->redirect(Route::_('index.php?option=com_batirpermi&view=apofadmins'));
+			return;
+		}
+
+		if (!$this->authoriseAction('core.edit', 'apofadmins')) {
+			return;
+		}
+
+		$model = $this->getModel('Apofadmin');
+		$imageJson = $model->getImageJson($id);
+
+		if ($imageJson) {
+			$imageData = json_decode($imageJson, true);
+			$filename = $imageData['fname'] ?? '';
+			if ($filename !== '') {
+				File::delete(JPATH_SITE . '/images/pdf/' . $filename);
+			}
+		}
+
+		if (!$model->clearImage($id)) {
+			$app->enqueueMessage(Text::_('JERROR_AN_ERROR_HAS_OCCURRED'), 'error');
+		}
+
+		$app->redirect(Route::_('index.php?option=com_batirpermi&view=apofadmin&id=' . $id));
+	}
+
+	private function authoriseAction(string $action, string $redirectView): bool
+	{
+		$app = Factory::getApplication();
+		$user = $app->getIdentity();
+
+		if ($user->authorise($action, 'com_batirpermi')) {
+			return true;
+		}
+
+		$app->enqueueMessage(Text::_('JERROR_ALERTNOAUTHOR'), 'error');
+		$app->redirect(Route::_('index.php?option=com_batirpermi&view=' . $redirectView));
+
+		return false;
+	}
+
+	private function buildPayload($input): array
+	{
+		$stateValue = $input->post->getString('state');
+		$state = ($stateValue === 'on' || $stateValue === '1') ? 1 : 0;
+
+		$payload = [
+			'title' => trim($input->post->getString('title')),
+			'reference' => trim($input->post->getString('reference')),
+			'type' => trim($input->post->getString('type')),
+			'lacated' => trim($input->post->getString('lacated')),
+			'caution' => trim($input->post->getString('caution')),
+			'created' => $this->normalizeNullableDate($input->post->getString('created')),
+			'echeance' => $this->normalizeNullableDate($input->post->getString('echeance')),
+			'datcommenc' => $this->normalizeNullableDate($input->post->getString('datcommenc')),
+			'datouvoffre' => $this->normalizeNullableDate($input->post->getString('datouvoffre')),
+			'params' => trim($input->post->getString('params')),
+			'language' => trim($input->post->getString('language')),
+			'image' => trim($input->post->getString('image')),
+			'state' => $state,
+		];
+
+		$payload['support'] = $this->buildSupportJson(
+			$input->post->get('LeTitre', [], 'array'),
+			$input->post->get('Laref', [], 'array')
+		);
+
+		$payload['lesbatirpermis'] = $this->buildPermisJson(
+			$input->post->get('titdoc', [], 'array'),
+			$input->files->get('leficher', [], 'array'),
+			$input->post->get('leficherh', [], 'array')
+		);
+
+		$imageJson = $this->buildImageJson($input->files->get('image', null, 'array'));
+		if ($imageJson !== null) {
+			$payload['image'] = $imageJson;
+		}
+
+		return $payload;
+	}
+
+	private function buildSupportJson(array $titles, array $refs): ?string
+	{
+		if (empty($titles)) {
+			return null;
+		}
+
+		$supportData = [];
+		foreach ($titles as $index => $title) {
+			$supportData['support' . $index] = [
+				'lesupport' => trim((string) $title),
+				'lereference' => trim((string) ($refs[$index] ?? '')),
+			];
+		}
+
+		return json_encode($supportData, JSON_UNESCAPED_UNICODE);
+	}
+
+	private function buildPermisJson(array $titles, array $files, array $existing = []): ?string
+	{
+		if (empty($titles)) {
+			return null;
+		}
+
+		$payload = [];
+		foreach ($titles as $index => $title) {
+			$filename = $existing[$index] ?? '';
+			$fileData = [
+				'error' => $files['error'][$index] ?? 4,
+				'name' => $files['name'][$index] ?? '',
+				'tmp_name' => $files['tmp_name'][$index] ?? '',
+			];
+
+			if ($fileData['error'] !== 4) {
+				$uploadedName = $this->uploadFile($fileData);
+				if ($uploadedName === null) {
+					throw new RuntimeException(Text::_('COM_BATIRPERMI_UPLOAD_FAILED'));
+				}
+				$filename = $uploadedName;
+			}
+
+			$payload['lesbatirpermis' . $index] = [
+				'letitre' => trim((string) $title),
+				'ledoc' => $filename,
+			];
+		}
+
+		return json_encode($payload, JSON_UNESCAPED_UNICODE);
+	}
+
+	private function buildImageJson(?array $file): ?string
+	{
+		if (!isset($file) || ($file['error'] ?? 4) === 4) {
+			return null;
+		}
+
+		$uploadedName = $this->uploadFile($file);
+		if ($uploadedName === null) {
+			throw new RuntimeException(Text::_('COM_BATIRPERMI_UPLOAD_FAILED'));
+		}
+
+		return json_encode([
+			'name' => $file['name'] ?? '',
+			'type' => $file['type'] ?? '',
+			'size' => $file['size'] ?? 0,
+			'fname' => basename($uploadedName),
+		], JSON_UNESCAPED_UNICODE);
+	}
+
+	private function uploadFile(array $file): ?string
+	{
+		$fileName = $file['name'] ?? '';
+		if ($fileName === '' || strpos($fileName, '.') === false) {
+			throw new RuntimeException(Text::_('COM_BATIRPERMI_UPLOAD_MISSING_EXTENSION'));
+		}
+
+		$timestamp = time();
+		$safeName = str_replace(' ', '-', File::makeSafe($fileName));
+		$relativePath = 'images/pdf/' . $timestamp . '-' . $safeName;
+		$targetPath = JPATH_SITE . '/' . $relativePath;
+
+		if (!File::upload($file['tmp_name'] ?? '', $targetPath)) {
+			return null;
+		}
+
+		return $relativePath;
+	}
+
+	private function normalizeNullableDate(string $value): ?string
+	{
+		$trimmed = trim($value);
+
+		return $trimmed === '' ? null : $trimmed;
+	}
 }

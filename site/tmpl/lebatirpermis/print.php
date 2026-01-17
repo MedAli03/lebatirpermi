@@ -1,41 +1,10 @@
 <?php
 \defined('_JEXEC') or die;
 
-use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
-use Joomla\Database\ParameterType;
 
-$app = Factory::getApplication();
-$input = $app->input;
-$cin = $input->getString('cin');
-$numdossier = $input->getString('numdossier');
-
-$result = null;
-
-if ($cin !== '' && $numdossier !== '') {
-	$db = Factory::getDbo();
-	$query = $db->getQuery(true)
-		->select([
-			$db->quoteName('p.id'),
-			$db->quoteName('p.title'),
-			$db->quoteName('p.nom'),
-			$db->quoteName('p.cin'),
-			$db->quoteName('p.typebatiment'),
-			$db->quoteName('p.ingenieur'),
-			$db->quoteName('c.title') . ' AS category_title',
-		])
-		->from($db->quoteName('#__batirpermi_lebatirpermis', 'p'))
-		->join('LEFT', $db->quoteName('#__batirpermi_categories', 'c') . ' ON c.id = p.lacated')
-		->where($db->quoteName('p.numdossier') . ' = :numdossier')
-		->where($db->quoteName('p.cin') . ' = :cin')
-		->bind(':numdossier', $numdossier, ParameterType::STRING)
-		->bind(':cin', $cin, ParameterType::STRING);
-
-	$db->setQuery($query);
-	$result = $db->loadAssoc();
-}
-
+$result = $this->printItem ?? null;
 $safeId = htmlspecialchars((string) ($result['id'] ?? ''), ENT_QUOTES, 'UTF-8');
 $safeTitle = htmlspecialchars((string) ($result['title'] ?? ''), ENT_QUOTES, 'UTF-8');
 $safeName = htmlspecialchars((string) ($result['nom'] ?? ''), ENT_QUOTES, 'UTF-8');
