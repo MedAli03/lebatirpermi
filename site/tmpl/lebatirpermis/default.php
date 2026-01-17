@@ -69,7 +69,7 @@ if ($input->post->get('submit')) {
 
             echo '<div class="text-center my-4">';
             echo '<a class="btn btn-primary me-2" href="services/permi-batir">' . Text::_('COM_PERMIBATIR_PERMIBATIRS_SEARCHAGAIN') . '</a>';
-            echo '<a class="btn btn-secondary" href="' . Route::_('components/com_batirpermi/tmpl/lebatirpermis/print.php?' . http_build_query(['numdossier' => $numdossier, 'cin' => $cin])) . '" target="_blank">Imprimer</a>';
+            echo '<a class="btn btn-secondary" href="' . Route::_('index.php?option=com_batirpermi&view=lebatirpermis&layout=print&' . http_build_query(['numdossier' => $numdossier, 'cin' => $cin])) . '" target="_blank">Imprimer</a>';
             echo '</div>';
         } else {
             echo '<div class="alert alert-danger text-center">' . Text::_('COM_PERMIBATIR_PERMIBATIRS_INCORRECT') . '</div>';
