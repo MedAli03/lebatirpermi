@@ -12,8 +12,6 @@ namespace J4xdemos\Component\Batirpermi\Site\Controller;
 defined('_JEXEC') or die;
 
 use Joomla\CMS\MVC\Controller\BaseController;
-use Joomla\CMS\Router\Route;
-use Joomla\CMS\Session\Session;
 
 /**
  * Batirpermi Component Controller
@@ -29,8 +27,4 @@ class DisplayController extends BaseController
 	 * @since  1.6
 	 */
 	protected $default_view = 'lebatirpermis';
-
-	protected $app;
-	
-		
 }

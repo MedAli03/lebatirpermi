@@ -1,20 +1,39 @@
+<?php
+\defined('_JEXEC') or die;
+
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Router\Route;
+
+$result = $this->printItem ?? null;
+$safeId = htmlspecialchars((string) ($result['id'] ?? ''), ENT_QUOTES, 'UTF-8');
+$safeTitle = htmlspecialchars((string) ($result['title'] ?? ''), ENT_QUOTES, 'UTF-8');
+$safeName = htmlspecialchars((string) ($result['nom'] ?? ''), ENT_QUOTES, 'UTF-8');
+$safeCin = htmlspecialchars((string) ($result['cin'] ?? ''), ENT_QUOTES, 'UTF-8');
+$safeType = htmlspecialchars((string) ($result['typebatiment'] ?? ''), ENT_QUOTES, 'UTF-8');
+$safeIngenieur = htmlspecialchars((string) ($result['ingenieur'] ?? ''), ENT_QUOTES, 'UTF-8');
+$safeResult = htmlspecialchars((string) ($result['category_title'] ?? ''), ENT_QUOTES, 'UTF-8');
+?>
+
 <style>
 #MnihlaTable {
- font-family: 'Droid Arabic Kufi',Tahoma, Geneva, sans-serif !important;
-  border-collapse: collapse;
-  width: 50%;
+	font-family: 'Droid Arabic Kufi', Tahoma, Geneva, sans-serif !important;
+	border-collapse: collapse;
+	width: 50%;
 	margin: 0 auto;
-   
 }
 
 #MnihlaTable td, #MnihlaTable th {
-  border: 1px solid #ddd;
-  padding: 8px;
+	border: 1px solid #ddd;
+	padding: 8px;
 }
 
-#MnihlaTable tr:nth-child(even){background-color: #f2f2f2;}
+#MnihlaTable tr:nth-child(even) {
+	background-color: #f2f2f2;
+}
 
-#MnihlaTable tr:hover {background-color: #ddd;}
+#MnihlaTable tr:hover {
+	background-color: #ddd;
+}
 
 #MnihlaTable th {
 	padding-top: 12px;
@@ -23,76 +42,50 @@
 	background-color: #09F;
 	color: white;
 }
-.form-style .form-group
-{
-	display:inline-block;
-	margin-bottom:0;
-	vertical-align:middle;
-	padding:10px;
-}
-.letableau
-{
-	width:50%;
-	border: solid #CCC;
-	text-align:center;
-	margin: 0 auto;
-	
-}
 </style>
-<?php
 
-
-$conn = new mysqli("cjemmeltafyu.mysql.db", "cjemmeltafyu", "Yu85AiuO","cjemmeltafyu");
-if ($conn->connect_error) {die("Connection failed: " . $conn->connect_error);}
-$sql = "SELECT * FROM `u2016_permibatir` WHERE `greeting` LIKE '".$_GET["numdossier"]."' AND `cin` LIKE '".$_GET["cin"]."' ORDER BY `cin` DESC ";
-$result = $conn->query($sql);
-$row = $result->fetch_assoc();
-
-$sql2 = "SELECT * FROM `u2016_categories` WHERE `id` = ".$row["catid"];
-$result2 = $conn->query($sql2);
-$row2 = $result2->fetch_assoc();
-
- 
- 
-  echo '<table id="MnihlaTable">';
-		echo '<tr>';
-    		echo '<td>N° Unique</td>';
-    		echo '<td>' . $row["id"]. '</td>';				
- 		echo '</tr>';
-		 echo '<tr>';
-    		echo '<td>N° Dossier</td>';
-    		echo '<td>' . $row["greeting"]. '</td>';				
- 		echo '</tr>';
-		 echo '<tr>';
-    		echo '<td>Nom et Prénom</td>';
-    		echo '<td>' . $row["name"]. '</td>';				
- 		echo '</tr>';
-		 echo '<tr>';
-    		echo '<td>CIN</td>';
-    		echo '<td>' . $row["cin"]. '</td>';				
- 		echo '</tr>';			
-		 echo '<tr>';
-    		echo '<td>Type</td>';
-    		echo '<td>' . $row["typebatir"]. '</td>';				
- 		echo '</tr>';
-		
-		 echo '<tr>';
-    		echo '<td>ingénieur</td>';
-    		echo '<td >' . $row["ingenieur"]. '</td>';				
- 		echo '</tr>';
-		
-		 echo '<tr>';
-    		echo '<td>Resultat</td>';
-    		echo '<td style="color:#F00;">' . $row2["title"]. '</td>';				
- 		echo '</tr>';
-		 
-		 echo '</table>';
-		 echo '<br>';
- 
- 
-  
-echo '<div align="center"><input type="button" value="Imprimer" onClick="window.print()"></div>';
-
- echo '<div align="center"><a type="button" href="http://c-jemmel.tn/index.php/ar/alalaka-maa-al-mouwatin/moutabaat-roukhas-al-binaa" >Retour</a></div>';
-
- 
+<?php if (!empty($result)) : ?>
+	<table id="MnihlaTable">
+		<tr>
+			<th><?php echo Text::_('COM_BATIRPERMI_PRINT_UNIQUE'); ?></th>
+			<td><?php echo $safeId; ?></td>
+		</tr>
+		<tr>
+			<th><?php echo Text::_('COM_BATIRPERMI_PRINT_DOSSIER'); ?></th>
+			<td><?php echo $safeTitle; ?></td>
+		</tr>
+		<tr>
+			<th><?php echo Text::_('COM_BATIRPERMI_PRINT_NAME'); ?></th>
+			<td><?php echo $safeName; ?></td>
+		</tr>
+		<tr>
+			<th><?php echo Text::_('COM_BATIRPERMI_PRINT_CIN'); ?></th>
+			<td><?php echo $safeCin; ?></td>
+		</tr>
+		<tr>
+			<th><?php echo Text::_('COM_BATIRPERMI_PRINT_TYPE'); ?></th>
+			<td><?php echo $safeType; ?></td>
+		</tr>
+		<tr>
+			<th><?php echo Text::_('COM_BATIRPERMI_PRINT_ENGINEER'); ?></th>
+			<td><?php echo $safeIngenieur; ?></td>
+		</tr>
+		<tr>
+			<th><?php echo Text::_('COM_BATIRPERMI_PRINT_RESULT'); ?></th>
+			<td style="color:#F00;"><?php echo $safeResult; ?></td>
+		</tr>
+	</table>
+	<br>
+	<div align="center">
+		<input type="button" value="<?php echo Text::_('COM_BATIRPERMI_PRINT_BUTTON'); ?>" onClick="window.print()">
+	</div>
+	<div align="center">
+		<a type="button" href="<?php echo Route::_('index.php?option=com_batirpermi&view=lebatirpermis'); ?>">
+			<?php echo Text::_('COM_BATIRPERMI_PRINT_BACK'); ?>
+		</a>
+	</div>
+<?php else : ?>
+	<div class="alert alert-warning" role="alert">
+		<?php echo Text::_('COM_BATIRPERMI_PRINT_NOT_FOUND'); ?>
+	</div>
+<?php endif; ?>
