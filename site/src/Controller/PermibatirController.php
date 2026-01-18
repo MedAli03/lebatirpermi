@@ -62,8 +62,20 @@ class PermibatirController extends BaseController
 
     public function print(): void
     {
-        $id = $this->input->getInt('id');
         $app = Factory::getApplication();
+        $rawId = $this->input->get('id', 0, 'raw');
+        $id = 0;
+
+        if (is_array($rawId)) {
+            $id = (int) ($rawId[0] ?? 0);
+        } else {
+            $id = (int) $rawId;
+        }
+
+        if ($id <= 0) {
+            $cid = $this->input->get('cid', [], 'array');
+            $id = (int) ($cid[0] ?? 0);
+        }
 
         if ($id <= 0) {
             $app->enqueueMessage(Text::_('COM_PERMIBATIR_PERMIBATIRS_INCORRECT'), 'error');

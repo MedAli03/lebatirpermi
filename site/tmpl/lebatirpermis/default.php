@@ -12,9 +12,15 @@ $form = is_array($this->form ?? null) ? $this->form : ['cin' => '', 'numdossier'
 $lang = Factory::getApplication()->getLanguage();
 $isRtl = $lang->isRtl();
 $printUrl = '';
-if (is_array($result) && !empty($result['id'])) {
+$resultId = 0;
+if (is_array($result) && isset($result['id'])) {
+    $resultId = (int) $result['id'];
+} elseif (is_object($result) && isset($result->id)) {
+    $resultId = (int) $result->id;
+}
+if ($resultId > 0) {
     $printUrl = Route::_(
-        'index.php?option=com_batirpermi&task=permibatir.print&id=' . (int) $result['id'] . '&tmpl=component'
+        'index.php?option=com_batirpermi&task=permibatir.print&id=' . $resultId . '&tmpl=component'
     );
 }
 ?>

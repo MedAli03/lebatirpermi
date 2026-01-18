@@ -3,7 +3,13 @@
 
 use Joomla\CMS\Language\Text;
 
-$item = is_array($this->item ?? null) ? $this->item : [];
+$item = $this->item ?? null;
+if (is_object($item)) {
+    $item = get_object_vars($item);
+}
+if (!is_array($item)) {
+    $item = [];
+}
 ?>
 
 <div class="permibatir-print">
