@@ -6,6 +6,8 @@ namespace J4xdemos\Component\Batirpermi\Site\Controller;
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Controller\BaseController;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Router\Route;
 
 class PermibatirController extends BaseController
 {
@@ -55,6 +57,32 @@ class PermibatirController extends BaseController
         $view->set('messageKey', $messageKey);
         $view->set('cin', $cin);
         $view->set('numdossier', $numdossier);
+        $view->display();
+    }
+
+    public function print(): void
+    {
+        $id = $this->input->getInt('id');
+        $app = Factory::getApplication();
+
+        if ($id <= 0) {
+            $app->enqueueMessage(Text::_('COM_PERMIBATIR_PERMIBATIRS_INCORRECT'), 'error');
+            $this->setRedirect(Route::_('index.php?option=com_batirpermi&view=lebatirpermis', false));
+            return;
+        }
+
+        $model = $this->getModel('Lebatirpermis');
+        $item = $model->getItemById($id);
+
+        if (empty($item)) {
+            $app->enqueueMessage(Text::_('COM_PERMIBATIR_PERMIBATIRS_INCORRECT'), 'error');
+            $this->setRedirect(Route::_('index.php?option=com_batirpermi&view=lebatirpermis', false));
+            return;
+        }
+
+        $view = $this->getView('Lebatirpermis', 'html');
+        $view->setLayout('print');
+        $view->set('item', $item);
         $view->display();
     }
 }

@@ -159,4 +159,27 @@ class LebatirpermisModel extends ListModel
 		return $query;
 	}
 
+	public function getItemById(int $id): array
+	{
+		$db = $this->getDbo();
+		$query = $db->getQuery(true)
+			->select([
+				'p.id',
+				'p.title',
+				'p.nom',
+				'p.cin',
+				'p.resultat',
+				'p.typebatiment',
+				'p.ingenieur',
+				'c.title AS category_title',
+			])
+			->from($db->quoteName('#__batirpermi_lebatirpermis', 'p'))
+			->join('LEFT', $db->quoteName('#__batirpermi_categories', 'c') . ' ON c.id = p.lacated')
+			->where($db->quoteName('p.id') . ' = :id')
+			->bind(':id', $id, ParameterType::INTEGER);
+
+		$db->setQuery($query);
+		return (array) $db->loadAssoc();
+	}
+
 }

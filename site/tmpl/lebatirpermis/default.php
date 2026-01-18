@@ -11,18 +11,12 @@ $error = $this->error ?? null;
 $form = is_array($this->form ?? null) ? $this->form : ['cin' => '', 'numdossier' => ''];
 $lang = Factory::getApplication()->getLanguage();
 $isRtl = $lang->isRtl();
-$printUrl = Route::_(
-    'components/com_batirpermi/tmpl/lebatirpermis/print.php?'
-    . http_build_query(
-        [
-            'numdossier' => $form['numdossier'],
-            'cin' => $form['cin'],
-        ],
-        '',
-        '&',
-        PHP_QUERY_RFC3986
-    )
-);
+$printUrl = '';
+if (is_array($result) && !empty($result['id'])) {
+    $printUrl = Route::_(
+        'index.php?option=com_batirpermi&task=permibatir.print&id=' . (int) $result['id'] . '&tmpl=component'
+    );
+}
 ?>
 
 <div class="container my-4 permibatir-wrapper" <?php echo $isRtl ? 'dir="rtl"' : ''; ?>>
@@ -105,7 +99,9 @@ $printUrl = Route::_(
 
                 <div class="text-center">
                     <a class="btn btn-outline-primary me-2" href="services/permi-batir"><?php echo Text::_('COM_PERMIBATIR_PERMIBATIRS_SEARCHAGAIN'); ?></a>
-                    <a class="btn btn-secondary" href="<?php echo htmlspecialchars($printUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">Imprimer</a>
+                    <?php if ($printUrl !== '') : ?>
+                        <a class="btn btn-secondary" href="<?php echo htmlspecialchars($printUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">Imprimer</a>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
