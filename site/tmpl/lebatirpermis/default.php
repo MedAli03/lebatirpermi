@@ -8,6 +8,8 @@ use Joomla\CMS\Router\Route;
 
 $app   = Factory::getApplication();
 $lang  = $app->getLanguage();
+$tag = $lang->getTag();
+$isArabic = (strpos($tag, 'ar-') === 0);
 $isRtl = $lang->isRtl();
 
 $result = $this->result ?? null;
@@ -45,14 +47,26 @@ if ($resultId > 0) {
     $printUrl = Route::_('index.php?option=com_batirpermi&task=permibatir.print&id=' . $resultId . '&tmpl=component');
 }
 
-// Small helper: try language key, else fallback Arabic
-$t = function (string $key, string $fallback) {
+// Small helper: try language key, else fallback by current language tag
+$t = function (string $key, array $fallbacks) use ($tag, $isArabic) {
     $txt = Text::_($key);
-    return ($txt === $key) ? $fallback : $txt;
+    if ($txt !== $key) {
+        return $txt;
+    }
+    if ($isArabic) {
+        return $fallbacks['ar'] ?? $key;
+    }
+    if (strpos($tag, 'fr-') === 0) {
+        return $fallbacks['fr'] ?? $key;
+    }
+    if (strpos($tag, 'en-') === 0) {
+        return $fallbacks['en'] ?? $key;
+    }
+    return $fallbacks['en'] ?? ($fallbacks['fr'] ?? ($fallbacks['ar'] ?? $key));
 };
 ?>
 
-<div class="container my-4 pb-ui" <?php echo $isRtl ? 'dir="rtl"' : 'dir="rtl"'; ?>>
+<div class="container my-4 pb-ui" <?php echo $isRtl ? 'dir="rtl"' : 'dir="ltr"'; ?>>
 
   <style>
     .pb-ui{
@@ -239,8 +253,8 @@ $t = function (string $key, string $fallback) {
   <div class="pb-wrap">
 
     <div class="pb-hero">
-      <h3 class="pb-title"><?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_TITRE', 'متابعة مطلب رخصة البناء'), ENT_QUOTES, 'UTF-8'); ?></h3>
-      <p class="pb-sub">أدخل رقم بطاقة التعريف الوطنية ورقم الملف للاطلاع على نتيجة مطلبك.</p>
+      <h3 class="pb-title"><?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_TITRE', ['ar' => 'متابعة مطلب رخصة البناء', 'fr' => 'Suivi de la demande de permis de construire', 'en' => 'Building permit application tracking']), ENT_QUOTES, 'UTF-8'); ?></h3>
+      <p class="pb-sub"><?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_SUBTITLE', ['ar' => 'أدخل رقم بطاقة التعريف الوطنية ورقم الملف للاطلاع على نتيجة مطلبك.', 'fr' => 'Saisissez le numéro de la carte d\'identité nationale et le numéro du dossier pour consulter le résultat de votre demande.', 'en' => 'Enter the national ID number and the file number to view your application result.']), ENT_QUOTES, 'UTF-8'); ?></p>
     </div>
 
     <?php if (!empty($error)) : ?>
@@ -248,7 +262,7 @@ $t = function (string $key, string $fallback) {
         <div class="d-flex align-items-start gap-2">
           <span class="pb-dot pb-dot-danger" aria-hidden="true"></span>
           <div>
-            <div class="pb-alert-title">حدث خطأ</div>
+            <div class="pb-alert-title"><?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_ERROR_TITLE', ['ar' => 'حدث خطأ', 'fr' => 'Une erreur est survenue', 'en' => 'An error occurred']), ENT_QUOTES, 'UTF-8'); ?></div>
             <div><?php echo htmlspecialchars((string) $error, ENT_QUOTES, 'UTF-8'); ?></div>
           </div>
         </div>
@@ -257,52 +271,52 @@ $t = function (string $key, string $fallback) {
 
     <div class="pb-card">
       <div class="pb-head">
-        <h4><?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_SEARCH', 'البحث'), ENT_QUOTES, 'UTF-8'); ?></h4>
-        <span class="pb-pill"><span class="pb-dot" aria-hidden="true"></span>خدمة التحقق الإلكتروني</span>
+        <h4><?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_SEARCH', ['ar' => 'البحث', 'fr' => 'Recherche', 'en' => 'Search']), ENT_QUOTES, 'UTF-8'); ?></h4>
+        <span class="pb-pill"><span class="pb-dot" aria-hidden="true"></span><?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_SERVICE_PILL', ['ar' => 'خدمة التحقق الإلكتروني', 'fr' => 'Service de vérification en ligne', 'en' => 'Online verification service']), ENT_QUOTES, 'UTF-8'); ?></span>
       </div>
 
       <div class="pb-body">
         <form action="<?php echo Route::_('index.php?option=com_batirpermi&task=permibatir.search'); ?>" method="post" class="row g-3">
           <div class="col-12 col-md-6">
-            <label for="cin" class="form-label"><?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_CIN', 'رقم بطاقة التعريف الوطنية'), ENT_QUOTES, 'UTF-8'); ?></label>
+            <label for="cin" class="form-label"><?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_CIN', ['ar' => 'رقم بطاقة التعريف الوطنية', 'fr' => 'Numéro de carte d\'identité nationale', 'en' => 'National ID number']), ENT_QUOTES, 'UTF-8'); ?></label>
             <input
               type="text"
               name="cin"
               id="cin"
               class="form-control"
               value="<?php echo htmlspecialchars($cin, ENT_QUOTES, 'UTF-8'); ?>"
-              placeholder="مثال: 12345678"
+              placeholder="<?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_CIN_PLACEHOLDER', ['ar' => 'مثال: 12345678', 'fr' => 'Exemple : 12345678', 'en' => 'Example: 12345678']), ENT_QUOTES, 'UTF-8'); ?>"
               inputmode="numeric"
               autocomplete="off"
               required
             >
-            <div class="form-text">ثمانية أرقام.</div>
+            <div class="form-text"><?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_CIN_HELP', ['ar' => 'ثمانية أرقام.', 'fr' => 'Huit chiffres.', 'en' => 'Eight digits.']), ENT_QUOTES, 'UTF-8'); ?></div>
           </div>
 
           <div class="col-12 col-md-6">
-            <label for="numdossier" class="form-label"><?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_NUMDOSSIER', 'رقم الملف'), ENT_QUOTES, 'UTF-8'); ?></label>
+            <label for="numdossier" class="form-label"><?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_NUMDOSSIER', ['ar' => 'رقم الملف', 'fr' => 'Numéro de dossier', 'en' => 'File number']), ENT_QUOTES, 'UTF-8'); ?></label>
             <input
               type="text"
               name="numdossier"
               id="numdossier"
               class="form-control"
               value="<?php echo htmlspecialchars($numdossier, ENT_QUOTES, 'UTF-8'); ?>"
-              placeholder="مثال: 2024/0158"
+              placeholder="<?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_NUMDOSSIER_PLACEHOLDER', ['ar' => 'مثال: 2024/0158', 'fr' => 'Exemple : 2024/0158', 'en' => 'Example: 2024/0158']), ENT_QUOTES, 'UTF-8'); ?>"
               autocomplete="off"
               required
             >
-            <div class="form-text">كما هو مذكور في الوصل.</div>
+            <div class="form-text"><?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_NUMDOSSIER_HELP', ['ar' => 'كما هو مذكور في الوصل.', 'fr' => 'Tel qu\'indiqué sur le reçu.', 'en' => 'As indicated on the receipt.']), ENT_QUOTES, 'UTF-8'); ?></div>
           </div>
 
           <div class="col-12">
             <div class="pb-actions">
               <button type="submit" name="submit" class="btn btn-primary">
-                بحث
+                <?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_SEARCH', ['ar' => 'بحث', 'fr' => 'Rechercher', 'en' => 'Search']), ENT_QUOTES, 'UTF-8'); ?>
               </button>
 
               <?php if ($cin !== '' || $numdossier !== '') : ?>
                 <a class="btn btn-outline-secondary" href="<?php echo Route::_('index.php?option=com_batirpermi&view=permibatir'); ?>">
-                  مسح
+                  <?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_CLEAR', ['ar' => 'مسح', 'fr' => 'Effacer', 'en' => 'Clear']), ENT_QUOTES, 'UTF-8'); ?>
                 </a>
               <?php endif; ?>
             </div>
@@ -316,57 +330,57 @@ $t = function (string $key, string $fallback) {
     <?php if (!empty($result)) : ?>
       <div class="pb-card">
         <div class="pb-head">
-          <h4>نتيجة البحث</h4>
-          <span class="pb-pill"><span class="pb-dot" aria-hidden="true"></span>تم العثور على الملف</span>
+          <h4><?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_RESULT_TITLE', ['ar' => 'نتيجة البحث', 'fr' => 'Résultat de la recherche', 'en' => 'Search result']), ENT_QUOTES, 'UTF-8'); ?></h4>
+          <span class="pb-pill"><span class="pb-dot" aria-hidden="true"></span><?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_RESULT_FOUND', ['ar' => 'تم العثور على الملف', 'fr' => 'Dossier trouvé', 'en' => 'File found']), ENT_QUOTES, 'UTF-8'); ?></span>
         </div>
 
         <div class="pb-body">
           <div class="pb-grid">
             <div class="pb-field">
-              <small><?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_NUMUNIQUE', 'المعرّف'), ENT_QUOTES, 'UTF-8'); ?></small>
+              <small><?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_NUMUNIQUE', ['ar' => 'المعرّف', 'fr' => 'Identifiant', 'en' => 'Identifier']), ENT_QUOTES, 'UTF-8'); ?></small>
               <div><?php echo htmlspecialchars((string) $getVal('id'), ENT_QUOTES, 'UTF-8'); ?></div>
             </div>
 
             <div class="pb-field">
-              <small><?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_NUMDOSSIER', 'رقم الملف'), ENT_QUOTES, 'UTF-8'); ?></small>
+              <small><?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_NUMDOSSIER', ['ar' => 'رقم الملف', 'fr' => 'Numéro de dossier', 'en' => 'File number']), ENT_QUOTES, 'UTF-8'); ?></small>
               <div><?php echo htmlspecialchars((string) $getVal('title'), ENT_QUOTES, 'UTF-8'); ?></div>
             </div>
 
             <div class="pb-field">
-              <small><?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_NAME', 'الاسم'), ENT_QUOTES, 'UTF-8'); ?></small>
+              <small><?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_NAME', ['ar' => 'الاسم', 'fr' => 'Nom', 'en' => 'Name']), ENT_QUOTES, 'UTF-8'); ?></small>
               <div><?php echo htmlspecialchars((string) $nameValue, ENT_QUOTES, 'UTF-8'); ?></div>
             </div>
 
             <div class="pb-field">
-              <small><?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_CIN', 'رقم ب.ت.و'), ENT_QUOTES, 'UTF-8'); ?></small>
+              <small><?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_CIN', ['ar' => 'رقم ب.ت.و', 'fr' => 'Numéro CNI', 'en' => 'ID number']), ENT_QUOTES, 'UTF-8'); ?></small>
               <div><?php echo htmlspecialchars((string) $getVal('cin'), ENT_QUOTES, 'UTF-8'); ?></div>
             </div>
 
             <div class="pb-field">
-              <small><?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_TYPE', 'نوع البناية'), ENT_QUOTES, 'UTF-8'); ?></small>
+              <small><?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_TYPE', ['ar' => 'نوع البناية', 'fr' => 'Type de bâtiment', 'en' => 'Building type']), ENT_QUOTES, 'UTF-8'); ?></small>
               <div><?php echo htmlspecialchars((string) $getVal('typebatiment'), ENT_QUOTES, 'UTF-8'); ?></div>
             </div>
 
             <div class="pb-field">
-              <small><?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_INGENIEUR', 'المهندس'), ENT_QUOTES, 'UTF-8'); ?></small>
+              <small><?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_INGENIEUR', ['ar' => 'المهندس', 'fr' => 'Ingénieur', 'en' => 'Engineer']), ENT_QUOTES, 'UTF-8'); ?></small>
               <div><?php echo htmlspecialchars((string) $getVal('ingenieur'), ENT_QUOTES, 'UTF-8'); ?></div>
             </div>
 
             <div class="pb-result">
-              <small><?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_RESULT', 'النتيجة'), ENT_QUOTES, 'UTF-8'); ?></small>
+              <small><?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_RESULT', ['ar' => 'النتيجة', 'fr' => 'Résultat', 'en' => 'Result']), ENT_QUOTES, 'UTF-8'); ?></small>
               <div><?php echo htmlspecialchars((string) $getVal('resultat'), ENT_QUOTES, 'UTF-8'); ?></div>
             </div>
           </div>
 
           <div class="pb-actions" style="margin-top: 14px;">
-            <?php if ($printUrl !== '') : ?>
+            <!-- <?php if ($printUrl !== '') : ?>
               <a class="btn btn-outline-primary" href="<?php echo htmlspecialchars($printUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">
-                طباعة
+                <?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_PRINT', ['ar' => 'طباعة', 'fr' => 'Imprimer', 'en' => 'Print']), ENT_QUOTES, 'UTF-8'); ?>
               </a>
-            <?php endif; ?>
+            <?php endif; ?> -->
 
             <a class="btn btn-secondary" href="<?php echo Route::_('index.php?option=com_batirpermi&view=permibatir'); ?>">
-              بحث جديد
+              <?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_SEARCHAGAIN', ['ar' => 'بحث جديد', 'fr' => 'Nouvelle recherche', 'en' => 'New search']), ENT_QUOTES, 'UTF-8'); ?>
             </a>
           </div>
 
@@ -377,8 +391,8 @@ $t = function (string $key, string $fallback) {
       <div class="pb-card">
         <div class="pb-body pb-empty">
           <div class="pb-empty-ico" aria-hidden="true">⌁</div>
-          <div style="font-weight:900;color:var(--text);margin-bottom:4px;">ابدأ بالبحث</div>
-          <div>قم بإدخال المعطيات أعلاه ثم اضغط على زر "بحث".</div>
+          <div style="font-weight:900;color:var(--text);margin-bottom:4px;"><?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_EMPTY_TITLE', ['ar' => 'ابدأ بالبحث', 'fr' => 'Commencez par une recherche', 'en' => 'Start your search']), ENT_QUOTES, 'UTF-8'); ?></div>
+          <div><?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_EMPTY_BODY', ['ar' => 'قم بإدخال المعطيات أعلاه ثم اضغط على زر البحث.', 'fr' => 'Saisissez les informations ci-dessus, puis cliquez sur Rechercher.', 'en' => 'Enter the information above, then click Search.']), ENT_QUOTES, 'UTF-8'); ?></div>
         </div>
       </div>
     <?php endif; ?>
