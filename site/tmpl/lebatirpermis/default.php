@@ -12,6 +12,7 @@ $isRtl = $lang->isRtl();
 
 $result = $this->result ?? null;
 $error  = $this->error ?? null;
+$messageKey = $this->messageKey ?? '';
 $form   = is_array($this->form ?? null) ? $this->form : ['cin' => '', 'numdossier' => ''];
 
 $cin        = isset($form['cin']) ? (string) $form['cin'] : '';
@@ -253,6 +254,18 @@ $t = function (string $key, string $fallback) {
           </div>
         </div>
       </div>
+<?php endif; ?>
+
+    <?php if (!empty($messageKey)) : ?>
+      <div class="pb-alert" role="alert">
+        <div class="d-flex align-items-start gap-2">
+          <span class="pb-dot pb-dot-danger" aria-hidden="true"></span>
+          <div>
+            <div class="pb-alert-title">تنبيه</div>
+            <div><?php echo htmlspecialchars(Text::_((string) $messageKey), ENT_QUOTES, 'UTF-8'); ?></div>
+          </div>
+        </div>
+      </div>
     <?php endif; ?>
 
     <div class="pb-card">
@@ -262,7 +275,7 @@ $t = function (string $key, string $fallback) {
       </div>
 
       <div class="pb-body">
-        <form action="<?php echo Route::_('index.php?option=com_batirpermi&task=permibatir.search'); ?>" method="post" class="row g-3">
+        <form action="<?php echo Route::_('index.php?option=com_batirpermi&view=lebatirpermis&task=permibatir.search'); ?>" method="post" class="row g-3">
           <div class="col-12 col-md-6">
             <label for="cin" class="form-label"><?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_CIN', 'رقم بطاقة التعريف الوطنية'), ENT_QUOTES, 'UTF-8'); ?></label>
             <input

@@ -2,6 +2,7 @@
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Router\Route;
 
 $cin       = isset($this->form['cin']) ? (string) $this->form['cin'] : '';
@@ -32,9 +33,19 @@ $isResultObject = is_object($this->result);
       </div>
     <?php endif; ?>
 
+    <?php if (!empty($this->messageKey)) : ?>
+      <div class="alert alert-warning d-flex align-items-start gap-2" role="alert">
+        <span class="bp-dot bp-dot-danger" aria-hidden="true"></span>
+        <div>
+          <div class="fw-semibold mb-1"><?php echo Text::_('JWARNING'); ?></div>
+          <div><?php echo htmlspecialchars(Text::_((string) $this->messageKey), ENT_QUOTES, 'UTF-8'); ?></div>
+        </div>
+      </div>
+    <?php endif; ?>
+
     <div class="card bp-card mb-4">
       <div class="card-body p-4">
-        <form method="post" action="<?php echo Route::_('index.php?option=com_batirpermi&task=permibatir.search'); ?>" class="row g-3">
+        <form method="post" action="<?php echo Route::_('index.php?option=com_batirpermi&view=lebatirpermis&task=permibatir.search'); ?>" class="row g-3">
           <div class="col-12 col-md-5">
             <label class="form-label bp-label" for="bpCin">
               <?php echo Text::_('COM_BATIRPERMI_FIELD_CIN_LABEL') ?: 'CIN'; ?>
@@ -79,6 +90,8 @@ $isResultObject = is_object($this->result);
               <?php echo Text::_('COM_BATIRPERMI_ACTION_SEARCH') ?: 'Rechercher'; ?>
             </button>
           </div>
+
+          <?php echo HTMLHelper::_('form.token'); ?>
         </form>
       </div>
     </div>

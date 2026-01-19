@@ -13,6 +13,7 @@ class HtmlView extends BaseHtmlView
     public array $form   = ['cin' => '', 'numdossier' => ''];
     public mixed $result = null;
     public ?string $error = null;
+    public ?string $messageKey = null;
 
     public bool $isRtl = false;
     public string $langTag = 'en-GB';
@@ -28,6 +29,7 @@ class HtmlView extends BaseHtmlView
         // Read state prepared by the controller (recommended pattern)
         $this->result = $app->getUserState('com_batirpermi.lebatirpermis.result', null);
         $this->error  = $app->getUserState('com_batirpermi.lebatirpermis.error', null);
+        $this->messageKey = $app->getUserState('com_batirpermi.lebatirpermis.messageKey', null);
 
         $savedForm = $app->getUserState('com_batirpermi.lebatirpermis.form', []);
         if (is_array($savedForm)) {
