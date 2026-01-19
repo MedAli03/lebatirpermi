@@ -373,11 +373,11 @@ $t = function (string $key, array $fallbacks) use ($tag, $isArabic) {
           </div>
 
           <div class="pb-actions" style="margin-top: 14px;">
-            <?php if ($printUrl !== '') : ?>
+            <!-- <?php if ($printUrl !== '') : ?>
               <a class="btn btn-outline-primary" href="<?php echo htmlspecialchars($printUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">
                 <?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_PRINT', ['ar' => 'طباعة', 'fr' => 'Imprimer', 'en' => 'Print']), ENT_QUOTES, 'UTF-8'); ?>
               </a>
-            <?php endif; ?>
+            <?php endif; ?> -->
 
             <a class="btn btn-secondary" href="<?php echo Route::_('index.php?option=com_batirpermi&view=permibatir'); ?>">
               <?php echo htmlspecialchars($t('COM_PERMIBATIR_PERMIBATIRS_SEARCHAGAIN', ['ar' => 'بحث جديد', 'fr' => 'Nouvelle recherche', 'en' => 'New search']), ENT_QUOTES, 'UTF-8'); ?>

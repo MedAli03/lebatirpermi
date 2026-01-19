@@ -1,0 +1,7 @@
+[33m9f0801f[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mcodex/refactor-default.php-and-create-site-controller[m[33m, [m[1;31morigin/codex/refactor-default.php-and-create-site-controller[m[33m)[m refactor the ui
+[33m0a98d1e[m Harden print input handling and template
+[33m9622ae9[m Add print task and template for permits
+[33mf006bc1[m Add Permibatir view state handling and refresh template
+[33m1aa66d5[m Refactor lebatirpermis template logic into controller
+[33m10268e7[m[33m ([m[1;31morigin/fix-old-version[m[33m, [m[1;32mfix-old-version[m[33m)[m delete controller files
+[33m05ca164[m[33m ([m[1;32mmain[m[33m)[m Initial commit
